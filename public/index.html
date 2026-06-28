@@ -502,7 +502,7 @@ function countUp(el, to, dur, fmt) {
   requestAnimationFrame(run);
 }
 
-function typewriter(el, text, charDelay=24, startDelay=650) {
+function typewriter(el, text, charDelay=68, startDelay=650) {
   el.textContent = '';
   const tn = document.createTextNode('');
   const cur = document.createElement('span');
@@ -511,17 +511,18 @@ function typewriter(el, text, charDelay=24, startDelay=650) {
   el.appendChild(cur);
   let i = 0;
   const pace = ch => {
-    if (',;'.includes(ch))    return charDelay * 4   + Math.random() * charDelay * 2;
-    if ('.!?'.includes(ch))   return charDelay * 5.5 + Math.random() * charDelay * 2;
-    if ('""\'"\''.includes(ch)) return charDelay * 2.5 + Math.random() * charDelay;
-    if (ch === ' ')           return charDelay * 1.1 + Math.random() * charDelay * 0.4;
-    return charDelay * (0.5 + Math.random() * 0.9);
+    const r = Math.random();
+    if ('.!?'.includes(ch))      return charDelay * 7   + r * charDelay * 5;   // breath after sentence end
+    if (',;:'.includes(ch))      return charDelay * 3.5 + r * charDelay * 2.5; // brief pause mid-sentence
+    if ('"\'""'''.includes(ch))  return charDelay * 2   + r * charDelay * 1.5; // quote mark hesitation
+    if (ch === ' ')              return charDelay * 0.7 + r * charDelay * 0.5; // between-word gap
+    if (r < 0.06) return charDelay * 9 + Math.random() * charDelay * 6;        // rare long think
+    if (r < 0.18) return charDelay * 2.5 + Math.random() * charDelay * 1.2;    // slight stumble
+    return charDelay * (0.55 + r * 0.85);                                       // normal keystroke
   };
   const tick = () => {
     tn.nodeValue = text.slice(0, i);
-    if (i < text.length) { setTimeout(tick, pace(text[i++])); }
-    else {
-    }
+    if (i < text.length) setTimeout(tick, pace(text[i++]));
   };
   setTimeout(tick, startDelay);
 }
@@ -1151,7 +1152,7 @@ let _qIdx = Math.floor(Math.random() * QUOTES.length);
 const _bq = document.querySelector('.qwrap blockquote');
 function runQuote(delay) {
   if (!_bq) return;
-  typewriter(_bq, QUOTES[_qIdx % QUOTES.length], 24, delay ?? 650);
+  typewriter(_bq, QUOTES[_qIdx % QUOTES.length], undefined, delay ?? 650);
 }
 runQuote();
 setInterval(() => {
