@@ -56,7 +56,7 @@ async function getAccessToken() {
 // ── Sheets helpers ───────────────────────────────────────────────────────────
 
 async function readRange(token, range) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueRenderOption=UNFORMATTED_VALUE`;
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   const data = await res.json();
   return data.values || [];
@@ -98,7 +98,7 @@ function parseAnchors(rows) {
   return rows.slice(1).filter(r => r[0]).map(r => ({
     name:  r[0] || '',
     ini:   r[1] || '',
-    value: parseInt(r[2] || '0', 10),
+    value: Math.round(Number(String(r[2] || '0').replace(/[^0-9.]/g, ''))) || 0,
   }));
 }
 
