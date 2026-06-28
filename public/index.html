@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>We. SG Dashboard</title>
 <style>
 /* ── EMBEDDED FONTS ── */
@@ -292,6 +293,44 @@ main{
 /* Donut */
 .dnut-wrap{position:relative;flex-shrink:0}
 .dnut-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:28px;color:var(--plum)}
+
+/* ── MOBILE RESPONSIVE ───────────────────────────── */
+@media (max-width: 768px) {
+  html,body{overflow:auto;height:auto}
+  #app{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+  .hdr{padding:0 14px 0 12px;height:54px}
+  .period-ctrl,.live{display:none}
+  .wordmark .ser{display:none}
+  .body{flex-direction:column;height:auto;overflow:visible}
+  #tray{
+    position:fixed;top:0;left:0;
+    width:100vw!important;height:100dvh;
+    z-index:200;overflow:auto;
+    transform:translateX(-100%);
+    transition:transform .32s cubic-bezier(.4,0,.2,1);
+  }
+  #tray:not(.shut){transform:translateX(0)}
+  #tray.shut{transform:translateX(-100%)}
+  .tray-in{width:100%;height:auto;min-height:100dvh;overflow-y:auto;padding-bottom:40px}
+  main{grid-template-columns:1fr;height:auto;overflow:visible;padding:16px;gap:16px}
+  #ac,#rc{height:auto;min-height:unset}
+  #ps,#ws{flex:none;height:auto}
+  .mrow,.pmrow{flex-direction:column;margin-bottom:12px;gap:12px}
+  .mc,.mv,.pb1,.pb2{height:110px;flex:none}
+  .alist{overflow-y:auto;max-height:340px}
+  .tbox{overflow:hidden;max-height:360px}
+  .pgbox{height:auto}
+  .pgrid{grid-template-columns:1fr 1fr;grid-template-rows:auto;grid-auto-flow:row;height:auto;max-height:280px;overflow-y:auto}
+  .wash{flex:none;min-height:160px}
+  .wash-hl{font-size:30px}
+}
+@media (max-width: 420px) {
+  .wordmark .disp{font-size:20px}
+  .we-mark{width:30px;height:30px}
+  main{padding:12px;gap:12px}
+  .wash-hl{font-size:24px}
+  .tbox{max-height:300px}
+}
 </style>
 </head>
 <body>
@@ -1000,6 +1039,12 @@ async function pollSheets() {
 // INIT — load from Sheets first, then render
 // ────────────────────────────────────────────────
 async function init() {
+  // Close tray by default on mobile
+  if (window.innerWidth <= 768) {
+    S.trayOpen = false;
+    $('tray').classList.add('shut');
+  }
+
   // First render with hardcoded data so dashboard appears instantly
   rAnchor();
   rWF();
