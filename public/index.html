@@ -705,7 +705,7 @@ function commitAnchorVal(idx) {
 function sortedSprints() {
   const list = [...S.sprints];
   if (S.sprintSort === 'next') {
-    const k = m => { const p=(m||'').split('.'); return parseInt(p[1]||'0',10)*100 + parseInt(p[0]||'0',10); };
+    const k = m => { const p=String(m||'').split('.'); return parseInt(p[1]||'0',10)*100 + parseInt(p[0]||'0',10); };
     list.sort((a,b) => k(a.ms) - k(b.ms));
   } else {
     list.sort((a,b) => (STAGEORD[a.stage]??9) - (STAGEORD[b.stage]??9));

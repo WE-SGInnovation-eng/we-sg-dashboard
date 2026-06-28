@@ -108,7 +108,7 @@ function parseSprints(rows) {
     team:  r[1] || '',
     name:  r[2] || '',
     stage: r[3] || 'Scoping',
-    ms:    r[4] || '',
+    ms:    r[4] != null ? String(r[4]) : '',
   }));
 }
 
