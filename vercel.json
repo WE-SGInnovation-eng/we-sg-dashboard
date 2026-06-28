@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/sheets.js": {
-      "runtime": "edge"
-    }
-  },
   "rewrites": [
     { "source": "/api/sheets", "destination": "/api/sheets" }
   ]
