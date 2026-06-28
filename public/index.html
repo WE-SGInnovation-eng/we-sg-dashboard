@@ -713,7 +713,7 @@ function sortedSprints() {
   return list.slice(0, 5);
 }
 
-function rWF() {
+function rWF(anim = true) {
   const sec = $('ws'); if (!sec) return;
   sec.innerHTML = '';
 
@@ -761,7 +761,7 @@ function rWF() {
       row.appendChild(sel);
     } else {
       row.appendChild(h('span', { cls:'stg', css:`width:${SW};color:${sc}`,
-        onClick: () => { S.editingSprint = { id:sp.id, field:'stage' }; rWF(); }
+        onClick: () => { S.editingSprint = { id:sp.id, field:'stage' }; rWF(false); }
       },
         h('span', { cls:'stg-dot', css:`background:${sc}` }),
         sp.stage
@@ -781,14 +781,14 @@ function rWF() {
           const s = S.sprints.find(x => x.id === sp.id);
           S.editingSprint = { id:sp.id, field:'next' };
           S.sprintDraft   = s ? s.ms : '';
-          rWF();
+          rWF(false);
         }
       }, sp.ms));
     }
     box.appendChild(row);
   });
   sec.appendChild(box);
-  if (_loaded) {
+  if (_loaded && anim) {
     box.querySelectorAll('.sr').forEach((r, i) => {
       r.style.animation = `rowIn .3s cubic-bezier(.22,1,.36,1) ${i * 30}ms both`;
     });
@@ -797,14 +797,14 @@ function rWF() {
 
 function commitStage(id, stage) {
   const sp = S.sprints.find(x => x.id === id); if (sp) sp.stage = stage;
-  S.editingSprint = null; rWF();
+  S.editingSprint = null; rWF(false);
   syncToSheets('sprints');
 }
 function commitNext() {
   const ed = S.editingSprint; if (!ed) return;
   const sp = S.sprints.find(x => x.id === ed.id);
   if (sp && S.sprintDraft.trim()) sp.ms = S.sprintDraft.trim();
-  S.editingSprint = null; S.sprintDraft = ''; rWF();
+  S.editingSprint = null; S.sprintDraft = ''; rWF(false);
   syncToSheets('sprints');
 }
 
