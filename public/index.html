@@ -405,7 +405,7 @@ main{
 // ────────────────────────────────────────────────
 const S = {
   trayOpen: true, period: 'MONTH',
-  anchorSort: 'value',
+  anchorSort: 'value', editingAnchorId: null, editingAnchorVal: '',
   sprintSort: 'stage', editingSprint: null, sprintDraft: '',
   editingIndex: null,
   addingSlot: false, anchorNameDraft: '', anchorValueDraft: '',
@@ -614,9 +614,32 @@ function rAnchor(sort) {
     row.appendChild(h('span', { cls:'ar-num' }, pad2(i+1)));
 
     if (filled) {
+      const origIdx = S.anchors.indexOf(a);
+      const isEditingVal = S.editingAnchorId === origIdx;
       row.appendChild(h('span', { cls:'av' }, a.ini));
       row.appendChild(h('span', { cls:'ar-name' }, a.name));
-      row.appendChild(h('span', { cls:'ar-val' }, fmtV(a.value)));
+      if (isEditingVal) {
+        const inp = h('input', {
+          cls:'ed-v', val:String(a.value), focus:true,
+          onInput:   e => { S.editingAnchorVal = e.target.value; },
+          onKeydown: e => {
+            if (e.key==='Enter') commitAnchorVal(origIdx);
+            else if (e.key==='Escape') { S.editingAnchorId=null; rAnchor(); }
+          },
+          onBlur: () => { if (S.editingAnchorId===origIdx) commitAnchorVal(origIdx); },
+        });
+        row.appendChild(inp);
+      } else {
+        const vs = h('span', { cls:'ar-val', title:'Click to edit value' }, fmtV(a.value));
+        vs.style.cursor = 'pointer';
+        vs.addEventListener('click', e => {
+          e.stopPropagation();
+          S.editingAnchorId = origIdx;
+          S.editingAnchorVal = String(a.value);
+          rAnchor();
+        });
+        row.appendChild(vs);
+      }
     } else if (editing) {
       const er = h('div', { cls:'ed-row' });
       er.appendChild(h('span', { cls:'ed-c' }));
@@ -663,6 +686,15 @@ function commitA() {
   const val = parseInt((S.anchorValueDraft || '').replace(/[^0-9]/g,''), 10) || 0;
   if (S.anchors.length < ANCHOR_MAX) { S.anchors.push({ name:nm, ini:getIni(nm), value:val }); confetti($('ac')); }
   S.addingSlot=false; S.anchorNameDraft=''; S.anchorValueDraft='';
+  rAnchor();
+  syncToSheets('anchors');
+}
+
+function commitAnchorVal(idx) {
+  const val = Math.round(Number(String(S.editingAnchorVal || '0').replace(/[^0-9.]/g, ''))) || 0;
+  S.anchors[idx].value = val;
+  S.editingAnchorId = null;
+  S.editingAnchorVal = '';
   rAnchor();
   syncToSheets('anchors');
 }
