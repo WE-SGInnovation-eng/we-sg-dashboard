@@ -1060,6 +1060,9 @@ async function pollSheets() {
       rProsp();
       changed = true;
     }
+    if (data.quotes && data.quotes.length && !snapEqual(data.quotes, QUOTES)) {
+      QUOTES = data.quotes; _qIdx = 0; runQuote(300);
+    }
 
     if (changed) console.log('[sync] updated from Sheets at', new Date().toLocaleTimeString());
   } catch (e) {
@@ -1092,6 +1095,7 @@ async function init() {
       S.anchors   = data.anchors;
       S.sprints   = data.sprints;
       S.prospects = data.prospects;
+      if (data.quotes && data.quotes.length) { QUOTES = data.quotes; _qIdx = 0; runQuote(300); }
       rAnchor();
       rWF();
       rProsp();
@@ -1134,7 +1138,7 @@ revealEl(_ps.querySelector('.pmrow'),     280);
 _ps.querySelectorAll('.pc').forEach((r, i) => revealEl(r, 395 + i * 28));
 
 // Quote rotation
-const QUOTES = [
+const QUOTES_FALLBACK = [
   '"The work that matters is the work clients can\'t do without."',
   '"Speed is a strategy. The agency that moves faster wins."',
   '"Build deep enough that switching us out costs more than keeping us."',
@@ -1142,11 +1146,12 @@ const QUOTES = [
   '"Compound effort beats brilliant one-offs. Show up, then show up again."',
   '"The best ideas don\'t come from pitches — they come from understanding the business."',
 ];
+let QUOTES = [...QUOTES_FALLBACK];
 let _qIdx = 0;
 const _bq = document.querySelector('.qwrap blockquote');
 function runQuote(delay) {
   if (!_bq) return;
-  typewriter(_bq, QUOTES[_qIdx], 24, delay ?? 650);
+  typewriter(_bq, QUOTES[_qIdx % QUOTES.length], 24, delay ?? 650);
 }
 runQuote();
 setInterval(() => {

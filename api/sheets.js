@@ -116,6 +116,10 @@ function parseProspects(rows) {
   return rows.slice(1).filter(r => r[0]).map(r => r[0]);
 }
 
+function parseQuotes(rows) {
+  return rows.slice(1).filter(r => r[0]).map(r => String(r[0]));
+}
+
 // ── CORS headers ─────────────────────────────────────────────────────────────
 
 const CORS = {
@@ -147,16 +151,18 @@ export default async function handler(req) {
 
     // ── GET all data ──────────────────────────────────────────────────────
     if (req.method === 'GET' || action === 'read') {
-      const [anchorRows, sprintRows, prospectRows] = await Promise.all([
+      const [anchorRows, sprintRows, prospectRows, quoteRows] = await Promise.all([
         readRange(token, 'Anchors!A:C'),
         readRange(token, 'Sprints!A:E'),
         readRange(token, 'Prospects!A:A'),
+        readRange(token, 'Quotes!A:A'),
       ]);
 
       return json({
         anchors:   parseAnchors(anchorRows),
         sprints:   parseSprints(sprintRows),
         prospects: parseProspects(prospectRows),
+        quotes:    parseQuotes(quoteRows),
         ts:        Date.now(),
       });
     }
