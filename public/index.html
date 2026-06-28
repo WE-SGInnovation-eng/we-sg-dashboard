@@ -514,7 +514,7 @@ function typewriter(el, text, charDelay=68, startDelay=650) {
     const r = Math.random();
     if ('.!?'.includes(ch))      return charDelay * 7   + r * charDelay * 5;   // breath after sentence end
     if (',;:'.includes(ch))      return charDelay * 3.5 + r * charDelay * 2.5; // brief pause mid-sentence
-    if ('"\'""'''.includes(ch))  return charDelay * 2   + r * charDelay * 1.5; // quote mark hesitation
+    if (['"', "'", '“', '”', '‘', '’'].includes(ch)) return charDelay * 2 + r * charDelay * 1.5;
     if (ch === ' ')              return charDelay * 0.7 + r * charDelay * 0.5; // between-word gap
     if (r < 0.06) return charDelay * 9 + Math.random() * charDelay * 6;        // rare long think
     if (r < 0.18) return charDelay * 2.5 + Math.random() * charDelay * 1.2;    // slight stumble
