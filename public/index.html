@@ -1008,6 +1008,7 @@ let _syncPending  = false;
 // Write local state → Sheets (debounced 800ms to avoid hammering on rapid edits)
 let _syncTimer = null;
 function syncToSheets(entity) {
+  _syncPending = true; // block polls immediately so they don't overwrite local edits
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(async () => {
     try {
@@ -1023,6 +1024,9 @@ function syncToSheets(entity) {
       });
     } catch (e) {
       console.warn('[sync] write failed:', e.message);
+    } finally {
+      // grace period: let Sheets propagate before we poll again
+      setTimeout(() => { _syncPending = false; }, 3000);
     }
   }, 800);
 }
