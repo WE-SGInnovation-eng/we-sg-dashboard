@@ -113,7 +113,10 @@ function parseSprints(rows) {
 }
 
 function parseProspects(rows) {
-  return rows.slice(1).filter(r => r[0]).map(r => r[0]);
+  return rows.slice(1).filter(r => r[0]).map(r => ({
+    name:     String(r[0]),
+    industry: r[1] ? String(r[1]) : '',
+  }));
 }
 
 function parseQuotes(rows) {
@@ -154,7 +157,7 @@ export default async function handler(req) {
       const [anchorRows, sprintRows, prospectRows, quoteRows] = await Promise.all([
         readRange(token, 'Anchors!A:C'),
         readRange(token, 'Sprints!A:E'),
-        readRange(token, 'Prospects!A:A'),
+        readRange(token, 'Prospects!A:B'),
         readRange(token, 'Quotes!A:A'),
       ]);
 
