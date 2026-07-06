@@ -1222,28 +1222,28 @@ $('btn-mom').addEventListener('click', () => {
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   function mkParticle(ox, oy, bias) {
-    const spread = Math.PI * 0.8;
+    const spread = Math.PI * 1.1;
     const angle  = bias + rnd(-spread / 2, spread / 2);
-    const speed  = rnd(4, 15);
+    const speed  = rnd(8, 28);
     const shape  = Math.random() < 0.6 ? 'rect' : 'circ';
     return {
-      x: ox + rnd(-18, 18), y: oy + rnd(-8, 8),
+      x: ox + rnd(-30, 30), y: oy + rnd(-10, 10),
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      osc: rnd(0, Math.PI * 2), oscSpeed: rnd(0.055, 0.11), oscAmp: rnd(0.5, 1.7),
-      rot: rnd(0, Math.PI * 2), rotV: rnd(-0.1, 0.1),
-      w: shape === 'rect' ? rnd(6, 13) : rnd(3, 6),
-      h: shape === 'rect' ? rnd(3, 5.5) : null,
+      osc: rnd(0, Math.PI * 2), oscSpeed: rnd(0.04, 0.09), oscAmp: rnd(0.8, 2.4),
+      rot: rnd(0, Math.PI * 2), rotV: rnd(-0.18, 0.18),
+      w: shape === 'rect' ? rnd(7, 15) : rnd(4, 7),
+      h: shape === 'rect' ? rnd(3.5, 6.5) : null,
       shape,
       color: COLS[Math.floor(Math.random() * COLS.length)],
       alpha: 1,
-      gravity: rnd(0.04, 0.09),
-      drag: rnd(0.993, 0.999),
+      gravity: rnd(0.01, 0.03),
+      drag: rnd(0.980, 0.992),
     };
   }
 
   function spawn(ox, oy, bias) {
-    _particles.push(...Array.from({ length: 55 }, () => mkParticle(ox, oy, bias)));
+    _particles.push(...Array.from({ length: 120 }, () => mkParticle(ox, oy, bias)));
   }
 
   function draw() {
