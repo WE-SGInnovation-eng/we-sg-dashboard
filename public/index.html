@@ -335,8 +335,9 @@ main{
 }
 
 .fs-ctrl{display:flex;align-items:center;gap:4px}
-.fs-btn{background:rgba(128,2,57,.28);border:none;color:var(--cream);border-radius:5px;padding:0 9px;height:26px;font-size:calc(11px * var(--fz,1));font-weight:700;letter-spacing:.06em;cursor:pointer;line-height:1}
-.fs-btn:hover{background:rgba(128,2,57,.5)}
+.fs-btn{background:rgba(128,2,57,.28);border:none;color:rgba(255,244,237,.45);border-radius:5px;padding:0 9px;height:26px;font-size:calc(11px * var(--fz,1));font-weight:700;letter-spacing:.06em;cursor:pointer;line-height:1}
+.fs-btn:hover{background:rgba(128,2,57,.5);color:rgba(255,244,237,.85)}
+.hdr-sep{width:1px;height:16px;background:rgba(255,244,237,.25)}
 /* ── MoM (Month-over-Month) ── */
 .mom-row{flex-shrink:0;display:flex;gap:14px;margin-bottom:14px}
 .mom-card{flex:1;min-width:0;min-height:130px;border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:var(--plum);color:var(--cream)}
@@ -377,6 +378,7 @@ main{
         <button class="fs-btn" id="btn-fs-dn">A&minus;</button>
         <button class="fs-btn" id="btn-fs-up">A+</button>
       </div>
+      <div class="hdr-sep"></div>
       <div class="period-ctrl">
         <button class="p-btn on" id="btn-month">JUNE '26</button>
         <span class="p-sep">|</span>
@@ -1234,6 +1236,7 @@ $('btn-mom').addEventListener('click', () => {
       shape,
       color: COLS[Math.floor(Math.random() * COLS.length)],
       alpha: 1,
+      life: 0, maxLife: rnd(55, 90),
       gravity: rnd(0.01, 0.03),
       drag: rnd(0.980, 0.992),
     };
@@ -1256,7 +1259,9 @@ $('btn-mom').addEventListener('click', () => {
       p.vy  += p.gravity;
       p.vx  *= p.drag;
       p.rot += p.rotV;
-      if (p.y > _cvs.height * 0.72) p.alpha = Math.max(0, p.alpha - 0.01);
+      p.life++;
+      if (p.life > p.maxLife) p.alpha = Math.max(0, p.alpha - 0.045);
+      if (p.y > _cvs.height * 0.6) p.alpha = Math.max(0, p.alpha - 0.03);
       if (p.y > _cvs.height || p.x < -60 || p.x > _cvs.width + 60) p.alpha = 0;
       ctx.save();
       ctx.globalAlpha = p.alpha;
