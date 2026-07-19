@@ -70,6 +70,29 @@ input,select{font-family:inherit}
 @keyframes twBlink{0%,100%{opacity:1}50%{opacity:0}}
 .tw-cursor{display:inline-block;width:2px;height:.82em;background:currentColor;vertical-align:-.08em;margin-left:2px;animation:twBlink .65s step-end infinite;transition:opacity .5s}
 
+/* ── ALIEN CELEBRATIONS ── */
+@keyframes alienBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14%)}}
+@keyframes alienWiggle{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+@keyframes alienConga{0%{transform:translateX(-30%) translateY(0)}25%{transform:translateX(-15%) translateY(-9%)}50%{transform:translateX(0) translateY(0)}75%{transform:translateX(15%) translateY(-9%)}100%{transform:translateX(30%) translateY(0)}}
+@keyframes celeIn{from{opacity:0}to{opacity:1}}
+@keyframes celeOut{from{opacity:1}to{opacity:0}}
+@keyframes bannerPop{0%{opacity:0;transform:translateY(18px) scale(.9)}60%{transform:translateY(0) scale(1.04)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes scoutPop{0%{transform:translateY(64px) scale(.5);opacity:0}70%{transform:translateY(-8px) scale(1.08);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+@keyframes scoutDuck{from{transform:translateY(0);opacity:1}to{transform:translateY(64px);opacity:0}}
+.alien-cele{position:fixed;inset:0;z-index:10000;pointer-events:auto;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;animation:celeIn .3s ease both;background:radial-gradient(130% 100% at 50% 100%,rgba(61,1,25,.42),rgba(61,1,25,.10) 55%,transparent 78%)}
+.alien-cele.out{animation:celeOut .45s ease both}
+.alien-banner{position:absolute;top:28%;left:0;right:0;text-align:center;pointer-events:none;padding:0 20px;animation:bannerPop .55s cubic-bezier(.22,1,.36,1) both}
+.alien-banner .ab-in{display:inline-block;padding:20px 40px;border-radius:18px;background:rgba(26,8,16,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-shadow:0 16px 48px rgba(0,0,0,.4);border:1px solid rgba(244,201,93,.35)}
+.alien-banner .eyebrow{display:block;font-family:var(--fb);font-size:calc(15px * var(--fz,1));font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+.alien-banner .name{display:block;margin-top:8px;font-family:var(--fs);font-style:italic;font-size:calc(52px * var(--fz,1));font-weight:600;color:#fff;line-height:1.05}
+.alien-crew{display:flex;gap:min(5vw,64px);align-items:flex-end;margin-bottom:7vh;pointer-events:none}
+.alien{width:clamp(74px,9vw,124px);animation:alienConga 1.2s ease-in-out infinite alternate}
+.alien svg,.scout svg{display:block;width:100%;height:auto;overflow:visible}
+.alien .abody{animation:alienBob .55s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.alien .aarm,.scout .aarm{transform-box:fill-box;transform-origin:50% 0;animation:alienWiggle .32s ease-in-out infinite}
+.alien-cele.rm,.alien-cele.rm *{animation:none!important}
+.scout{position:fixed;z-index:9999;pointer-events:none;width:64px}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:7px;height:7px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -143,6 +166,7 @@ input,select{font-family:inherit}
 .wash-eye{font-size:calc(10px * var(--fz,1));font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,244,237,.8);margin-bottom:8px}
 .wash-hl{font-size:calc(44px * var(--fz,1));font-weight:600;line-height:1.05;color:#fff}
 .wash-hl em{font-family:var(--fs);font-style:italic;font-weight:500;color:#fff}
+.wash-sub{font-size:calc(21px * var(--fz,1));font-weight:400;line-height:1.3;color:rgba(255,244,237,.82);margin-top:10px;font-family:var(--fs);font-style:italic}
 .tc{flex:1;border:1px solid var(--rule);border-radius:10px;padding:14px 18px;margin-top:0;background:var(--cream);display:flex;flex-direction:column;justify-content:center}
 .tc.warm{background:var(--cream-w);border-color:var(--cream)}
 .tc:not(.warm){flex:none}
@@ -237,6 +261,8 @@ main{
 .ed-n,.ed-v{padding:6px 9px;border:1px solid var(--plum);border-radius:7px;font-size:calc(14px * var(--fz,1));outline:none;background:#fff}
 .ed-n{flex:1;min-width:0;color:var(--ink)}.ed-v{width:90px;flex-shrink:0;color:var(--plum)}
 .ed-ok{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:calc(13px * var(--fz,1));display:flex;align-items:center;justify-content:center}
+.ar-del{flex-shrink:0;width:21px;height:21px;border-radius:50%;background:transparent;color:rgba(128,2,57,.34);border:none;line-height:1;font-size:calc(12px * var(--fz,1));display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;opacity:.85}
+.ar-del:hover,.ar-del:focus-visible{background:var(--red);color:#fff;opacity:1}
 
 /* ── RIGHT COL ── */
 #rc{display:flex;flex-direction:column;gap:18px;min-height:0;min-width:0}
@@ -398,7 +424,8 @@ main{
           <div class="grain"></div>
           <div class="wash-body">
             <div class="wash-eye">THE 3 YEAR VISION ✨</div>
-            <div class="wash-hl">Build what clients can't <em>replace</em></div>
+            <div class="wash-hl">Build what clients can't <em>recreate elsewhere</em>,</div>
+            <div class="wash-sub">and a place where people grow faster than anywhere else.</div>
           </div>
         </div>
         <div class="tc">
@@ -412,7 +439,7 @@ main{
           <ol class="ddu-ol">
             <li class="ddu-li"><span class="ddu-n">#1</span><span class="ddu-t">Create client <strong>d</strong>ependency &amp; increase switch cost</span></li>
             <li class="ddu-li"><span class="ddu-n">#2</span><span class="ddu-t">Win &amp; anchor clients with commercial <strong>d</strong>iscipline</span></li>
-            <li class="ddu-li"><span class="ddu-n">#3</span><span class="ddu-t">Build AI that <strong>u</strong>plifts others</span></li>
+            <li class="ddu-li"><span class="ddu-n">#3</span><span class="ddu-t">Build a culture that <strong>u</strong>plifts everyone — without AI</span></li>
           </ol>
         </div>
         <figure class="qwrap">
@@ -779,6 +806,8 @@ function rAnchor(sort) {
         });
         row.appendChild(vs);
       }
+      const del = h('button', { cls:'ar-del', title:'Remove client', onClick: e => { e.stopPropagation(); removeAnchor(origIdx); } }, '✕');
+      row.appendChild(del);
     } else if (editing) {
       const er = h('div', { cls:'ed-row' });
       er.appendChild(h('span', { cls:'ed-c' }));
@@ -823,8 +852,15 @@ function commitA() {
   const nm = (S.anchorNameDraft || '').trim();
   if (!nm) { S.addingSlot=false; rAnchor(); return; }
   const val = parseInt((S.anchorValueDraft || '').replace(/[^0-9]/g,''), 10) || 0;
-  if (S.anchors.length < ANCHOR_MAX) { S.anchors.push({ name:nm, ini:getIni(nm), value:val }); confetti($('ac')); }
+  if (S.anchors.length < ANCHOR_MAX) { S.anchors.push({ name:nm, ini:getIni(nm), value:val }); alienCelebrate(nm); }
   S.addingSlot=false; S.anchorNameDraft=''; S.anchorValueDraft='';
+  rAnchor();
+  syncToSheets('anchors');
+}
+
+function removeAnchor(idx) {
+  if (idx < 0 || idx >= S.anchors.length) return;
+  S.anchors.splice(idx, 1);
   rAnchor();
   syncToSheets('anchors');
 }
@@ -1172,7 +1208,7 @@ function commitProsp() {
   const draftVal = S.editingIndex !== null ? (S.prospects[S.editingIndex] || '').trim() : '';
   S.prospects = S.prospects.filter(p => p && p.trim());
   S.editingIndex = null; S._addingProspect = false; rProsp();
-  if (wasNew && draftVal) confetti($('ps'));
+  if (wasNew && draftVal) { confetti($('ps')); scoutAlien(draftVal); }
   syncToSheets('prospects');
 }
 
@@ -1300,6 +1336,115 @@ $('btn-mom').addEventListener('click', () => {
     _raf = requestAnimationFrame(draw);
   };
 })();
+
+// ────────────────────────────────────────────────
+// ALIEN CELEBRATIONS
+// ────────────────────────────────────────────────
+
+// Shared green-alien artwork, reused by the anchor crew and the prospect scout.
+function alienSVG() {
+  return '<svg viewBox="0 0 100 132" aria-hidden="true">'
+    + '<g class="aarm"><rect x="14" y="70" width="8" height="26" rx="4" fill="#4bb14b" transform="rotate(24 18 72)"/></g>'
+    + '<g class="aarm" style="animation-direction:reverse"><rect x="78" y="70" width="8" height="26" rx="4" fill="#4bb14b" transform="rotate(-24 82 72)"/></g>'
+    + '<g class="abody">'
+    +   '<line x1="40" y1="26" x2="32" y2="8" stroke="#3a9d3a" stroke-width="3" stroke-linecap="round"/>'
+    +   '<line x1="60" y1="26" x2="68" y2="8" stroke="#3a9d3a" stroke-width="3" stroke-linecap="round"/>'
+    +   '<circle cx="31" cy="7" r="5" fill="#7CFC00"/><circle cx="69" cy="7" r="5" fill="#7CFC00"/>'
+    +   '<ellipse cx="50" cy="46" rx="31" ry="28" fill="#5CCB5C"/>'
+    +   '<ellipse cx="39" cy="47" rx="7.5" ry="11" fill="#111"/><ellipse cx="61" cy="47" rx="7.5" ry="11" fill="#111"/>'
+    +   '<circle cx="41.5" cy="42" r="2.6" fill="#fff"/><circle cx="63.5" cy="42" r="2.6" fill="#fff"/>'
+    +   '<path d="M40 61 Q50 70 60 61" stroke="#2f7d2f" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+    +   '<rect x="35" y="71" width="30" height="35" rx="13" fill="#5CCB5C"/>'
+    +   '<rect x="40" y="101" width="7.5" height="22" rx="3.75" fill="#4bb14b"/><rect x="52.5" y="101" width="7.5" height="22" rx="3.75" fill="#4bb14b"/>'
+    + '</g>'
+    + '</svg>';
+}
+
+function _prefersReduced() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+// Full-dashboard "Alien Crew" takeover when a new anchor client is landed.
+function alienCelebrate(name) {
+  const prev = document.getElementById('alienCele');
+  if (prev) prev.remove();
+  const reduce = _prefersReduced();
+
+  const ov = document.createElement('div');
+  ov.id = 'alienCele';
+  ov.className = 'alien-cele' + (reduce ? ' rm' : '');
+
+  const banner = document.createElement('div');
+  banner.className = 'alien-banner';
+  banner.innerHTML = '<span class="ab-in"><span class="eyebrow">New anchor secured 🛸</span><span class="name"></span></span>';
+  banner.querySelector('.name').textContent = name;
+
+  const crew = document.createElement('div');
+  crew.className = 'alien-crew';
+  for (let i = 0; i < 5; i++) {
+    const a = document.createElement('div');
+    a.className = 'alien';
+    a.innerHTML = alienSVG();
+    if (!reduce) {
+      a.style.animationDelay = (i * 0.09) + 's';
+      a.querySelectorAll('.abody').forEach(b => { b.style.animationDelay = (i * 0.07) + 's'; });
+      a.querySelectorAll('.aarm').forEach((b, j) => { b.style.animationDelay = ((i * 0.07) + (j * 0.05)) + 's'; });
+    }
+    crew.appendChild(a);
+  }
+
+  ov.appendChild(banner);
+  ov.appendChild(crew);
+  document.body.appendChild(ov);
+
+  if (!reduce) {
+    try { confetti($('ac')); } catch (e) {}
+    setTimeout(() => { try { confetti($('ac')); } catch (e) {} }, 700);
+  }
+
+  let done = false;
+  const close = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    document.removeEventListener('keydown', onKey);
+    ov.classList.add('out');
+    setTimeout(() => ov.remove(), 460);
+  };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  ov.addEventListener('click', close);
+  document.addEventListener('keydown', onKey);
+  const timer = setTimeout(close, reduce ? 1500 : 3500);
+}
+
+// Smaller in-place "scout alien" that pops up over a newly added prospect card.
+function scoutAlien(name) {
+  const ps = $('ps');
+  if (!ps) return;
+  let card = null;
+  ps.querySelectorAll('.pc').forEach(c => {
+    const val = c.querySelector('.pc-val');
+    if (val && val.textContent === name) card = c;
+  });
+  if (!card) return;
+
+  const r = card.getBoundingClientRect();
+  const W = 64;
+  const sc = document.createElement('div');
+  sc.className = 'scout';
+  sc.innerHTML = alienSVG();
+  sc.style.left = (r.left + r.width / 2 - W / 2) + 'px';
+  sc.style.top  = (r.top - 66) + 'px';
+  document.body.appendChild(sc);
+
+  if (_prefersReduced()) {
+    setTimeout(() => sc.remove(), 800);
+    return;
+  }
+  sc.style.animation = 'scoutPop .45s cubic-bezier(.22,1,.36,1) both';
+  setTimeout(() => { sc.style.animation = 'scoutDuck .4s ease both'; }, 1200);
+  setTimeout(() => sc.remove(), 1650);
+}
 
 // ────────────────────────────────────────────────
 // SHEETS SYNC
