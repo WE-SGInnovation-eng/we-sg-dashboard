@@ -90,3 +90,12 @@ The Vercel Edge Function writes the full updated list back to the sheet.
 **Edits in Sheets don't appear in dashboard**
 → Wait up to 5 seconds for the next poll cycle
 → Check console for `[sync] updated from Sheets` log messages
+
+---
+
+## Deployment
+
+The Vercel project is connected to this GitHub repo. Every push/merge to
+`main` automatically deploys to production at
+https://we-sg-dashboard.vercel.app (build serves the `public/` folder per
+`vercel.json`). No manual step is needed — just merge to `main`.
