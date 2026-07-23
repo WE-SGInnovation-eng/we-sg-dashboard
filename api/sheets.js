@@ -50,6 +50,9 @@ async function getAccessToken() {
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
   });
   const data = await res.json();
+  if (!res.ok || !data.access_token) {
+    throw new Error(`Auth failed: ${data.error_description || data.error || res.status}`);
+  }
   return data.access_token;
 }
 
@@ -59,6 +62,12 @@ async function readRange(token, range) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueRenderOption=UNFORMATTED_VALUE`;
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   const data = await res.json();
+  // Surface Sheets errors (429 rate-limit, auth blips, etc.) as a thrown error
+  // so the handler returns 500. Otherwise a transient failure becomes an empty
+  // 200 that the dashboard mistakes for "no data" and blanks the UI.
+  if (!res.ok) {
+    throw new Error(`Sheets read failed for ${range}: ${data.error?.message || res.status}`);
+  }
   return data.values || [];
 }
 

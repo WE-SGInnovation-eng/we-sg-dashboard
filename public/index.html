@@ -1499,20 +1499,27 @@ async function pollSheets() {
     if (snap === _lastSnapshot) return; // nothing changed
     _lastSnapshot = snap;
 
+    // Guard: a transient Sheets/token hiccup surfaces as empty arrays (the
+    // API returns 200 with `[]` rather than erroring), and a full-replace
+    // write clears the range for a moment before the new rows land. Never let
+    // an empty payload overwrite populated local state — that is what makes
+    // sections blank out mid-session. Treat "no rows this cycle" as no-op.
+    const hasRows = v => Array.isArray(v) && v.length > 0;
+
     let changed = false;
 
-    if (!snapEqual(data.anchors, S.anchors)) {
+    if (hasRows(data.anchors) && !snapEqual(data.anchors, S.anchors)) {
       S.anchors = data.anchors;
       rAnchor();
       changed = true;
     }
-    if (!snapEqual(data.sprints, S.sprints)) {
+    if (hasRows(data.sprints) && !snapEqual(data.sprints, S.sprints)) {
       S.sprints = data.sprints;
       rWF();
       changed = true;
     }
-    if (!snapEqual(data.prospects, S.prospects)) {
-      const _rawP = data.prospects || [];
+    if (hasRows(data.prospects) && !snapEqual(data.prospects, S.prospects)) {
+      const _rawP = data.prospects;
       S.prospects = _rawP.map(p => typeof p === 'string' ? p : (p.name || ''));
       _computeWarm(_rawP);
       rProsp();
@@ -1550,11 +1557,14 @@ async function init() {
     if (res.ok) {
       const data = await res.json();
       _lastSnapshot = JSON.stringify({ a: data.anchors, s: data.sprints, p: data.prospects });
-      S.anchors   = data.anchors;
-      S.sprints   = data.sprints;
-      const _rawPi = data.prospects || [];
-      S.prospects = _rawPi.map(p => typeof p === 'string' ? p : (p.name || ''));
-      _computeWarm(_rawPi);
+      const okRows = v => Array.isArray(v) && v.length > 0;
+      if (okRows(data.anchors)) S.anchors = data.anchors;
+      if (okRows(data.sprints)) S.sprints = data.sprints;
+      if (okRows(data.prospects)) {
+        const _rawPi = data.prospects;
+        S.prospects = _rawPi.map(p => typeof p === 'string' ? p : (p.name || ''));
+        _computeWarm(_rawPi);
+      }
       if (data.quotes && data.quotes.length) { QUOTES = data.quotes; _qIdx = Math.floor(Math.random() * QUOTES.length); runQuote(300); }
       rAnchor();
       rWF();
