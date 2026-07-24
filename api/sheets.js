@@ -14,10 +14,19 @@ function b64url(str) {
   return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+// Cache the OAuth token across invocations. Edge instances stay warm between
+// requests, so without this every request — including every 5s poll — paid for
+// a fresh JWT sign + round-trip to Google's token endpoint before any Sheets
+// read could start. Tokens live ~1h; we refresh 5min early to be safe.
+let _token    = null;
+let _tokenExp = 0; // unix seconds
+
 async function getAccessToken() {
+  const now = Math.floor(Date.now() / 1000);
+  if (_token && now < _tokenExp - 300) return _token;
+
   const email      = process.env.GOOGLE_SERVICE_EMAIL;
   const rawKey     = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
-  const now        = Math.floor(Date.now() / 1000);
 
   const header  = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const payload = b64url(JSON.stringify({
@@ -50,7 +59,13 @@ async function getAccessToken() {
     body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
   });
   const data = await res.json();
-  return data.access_token;
+  if (!res.ok || !data.access_token) {
+    throw new Error(`Auth failed: ${data.error_description || data.error || res.status}`);
+  }
+
+  _token    = data.access_token;
+  _tokenExp = now + (data.expires_in || 3600);
+  return _token;
 }
 
 // ── Sheets helpers ───────────────────────────────────────────────────────────
@@ -59,6 +74,12 @@ async function readRange(token, range) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueRenderOption=UNFORMATTED_VALUE`;
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   const data = await res.json();
+  // Surface Sheets errors (429 rate-limit, auth blips, etc.) as a thrown error
+  // so the handler returns 500. Otherwise a transient failure becomes an empty
+  // 200 that the dashboard mistakes for "no data" and blanks the UI.
+  if (!res.ok) {
+    throw new Error(`Sheets read failed for ${range}: ${data.error?.message || res.status}`);
+  }
   return data.values || [];
 }
 

@@ -163,10 +163,10 @@ input,select{font-family:inherit}
   background-size:180px 180px;
 }
 .wash-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center}
-.wash-eye{font-size:calc(10px * var(--fz,1));font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,244,237,.8);margin-bottom:8px}
-.wash-hl{font-size:calc(44px * var(--fz,1));font-weight:600;line-height:1.05;color:#fff}
+.wash-eye{font-size:calc(10px * var(--fz,1));font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,244,237,.8);margin-bottom:6px}
+.wash-hl{font-size:calc(28px * var(--fz,1));font-weight:600;line-height:1.1;color:#fff}
 .wash-hl em{font-family:var(--fs);font-style:italic;font-weight:500;color:#fff}
-.wash-sub{font-size:calc(21px * var(--fz,1));font-weight:400;line-height:1.3;color:rgba(255,244,237,.82);margin-top:10px;font-family:var(--fs);font-style:italic}
+.wash-sub{font-size:calc(15px * var(--fz,1));font-weight:400;line-height:1.3;color:rgba(255,244,237,.82);margin-top:6px;font-family:var(--fs);font-style:italic}
 .tc{flex:1;border:1px solid var(--rule);border-radius:10px;padding:14px 18px;margin-top:0;background:var(--cream);display:flex;flex-direction:column;justify-content:center}
 .tc.warm{background:var(--cream-w);border-color:var(--cream)}
 .tc:not(.warm){flex:none}
@@ -1499,20 +1499,27 @@ async function pollSheets() {
     if (snap === _lastSnapshot) return; // nothing changed
     _lastSnapshot = snap;
 
+    // Guard: a transient Sheets/token hiccup surfaces as empty arrays (the
+    // API returns 200 with `[]` rather than erroring), and a full-replace
+    // write clears the range for a moment before the new rows land. Never let
+    // an empty payload overwrite populated local state — that is what makes
+    // sections blank out mid-session. Treat "no rows this cycle" as no-op.
+    const hasRows = v => Array.isArray(v) && v.length > 0;
+
     let changed = false;
 
-    if (!snapEqual(data.anchors, S.anchors)) {
+    if (hasRows(data.anchors) && !snapEqual(data.anchors, S.anchors)) {
       S.anchors = data.anchors;
       rAnchor();
       changed = true;
     }
-    if (!snapEqual(data.sprints, S.sprints)) {
+    if (hasRows(data.sprints) && !snapEqual(data.sprints, S.sprints)) {
       S.sprints = data.sprints;
       rWF();
       changed = true;
     }
-    if (!snapEqual(data.prospects, S.prospects)) {
-      const _rawP = data.prospects || [];
+    if (hasRows(data.prospects) && !snapEqual(data.prospects, S.prospects)) {
+      const _rawP = data.prospects;
       S.prospects = _rawP.map(p => typeof p === 'string' ? p : (p.name || ''));
       _computeWarm(_rawP);
       rProsp();
@@ -1550,11 +1557,14 @@ async function init() {
     if (res.ok) {
       const data = await res.json();
       _lastSnapshot = JSON.stringify({ a: data.anchors, s: data.sprints, p: data.prospects });
-      S.anchors   = data.anchors;
-      S.sprints   = data.sprints;
-      const _rawPi = data.prospects || [];
-      S.prospects = _rawPi.map(p => typeof p === 'string' ? p : (p.name || ''));
-      _computeWarm(_rawPi);
+      const okRows = v => Array.isArray(v) && v.length > 0;
+      if (okRows(data.anchors)) S.anchors = data.anchors;
+      if (okRows(data.sprints)) S.sprints = data.sprints;
+      if (okRows(data.prospects)) {
+        const _rawPi = data.prospects;
+        S.prospects = _rawPi.map(p => typeof p === 'string' ? p : (p.name || ''));
+        _computeWarm(_rawPi);
+      }
       if (data.quotes && data.quotes.length) { QUOTES = data.quotes; _qIdx = Math.floor(Math.random() * QUOTES.length); runQuote(300); }
       rAnchor();
       rWF();
