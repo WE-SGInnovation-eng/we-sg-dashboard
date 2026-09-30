@@ -54,7 +54,7 @@ alter table public.quotes    enable row level security;
 create or replace function public.replace_anchors(rows jsonb)
 returns void language plpgsql as $$
 begin
-  delete from public.anchors;
+  delete from public.anchors where true;  -- Supabase blocks DELETE without WHERE
   insert into public.anchors (position, name, ini, value)
   select r.ord,
          trim(r.elem->>'name'),
@@ -68,7 +68,7 @@ $$;
 create or replace function public.replace_sprints(rows jsonb)
 returns void language plpgsql as $$
 begin
-  delete from public.sprints;
+  delete from public.sprints where true;  -- Supabase blocks DELETE without WHERE
   insert into public.sprints (id, position, team, name, stage, ms)
   select distinct on (trim(r.elem->>'id')::integer)
          trim(r.elem->>'id')::integer,
@@ -99,7 +99,7 @@ begin
     order by lower(trim(name)), position
   ) o;
 
-  delete from public.prospects;
+  delete from public.prospects where true;  -- Supabase blocks DELETE without WHERE
   insert into public.prospects (position, name, industry)
   select i.ord, i.name, coalesce(i.industry, old_industry->>lower(i.name), '')
   from (
@@ -117,7 +117,7 @@ $$;
 create or replace function public.replace_quotes(rows jsonb)
 returns void language plpgsql as $$
 begin
-  delete from public.quotes;
+  delete from public.quotes where true;  -- Supabase blocks DELETE without WHERE
   insert into public.quotes (position, text)
   select r.ord, trim(r.elem #>> '{}')
   from jsonb_array_elements(rows) with ordinality as r(elem, ord)
