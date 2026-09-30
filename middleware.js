@@ -2,9 +2,10 @@ export const config = {
   matcher: '/(.*)',
 }
 
-// Called by the Google Sheet's script, which can't log in. It checks its own
-// shared secret instead (see api/sheet-sync.js).
-const PUBLIC_PATHS = ['/api/sheet-sync']
+// /api/sheet-sync is called by the Google Sheet's script, which can't log in.
+// It checks its own shared secret instead (see api/sheet-sync.js).
+// The icons are public so Vercel's project list can show the We. logo.
+const PUBLIC_PATHS =['/api/sheet-sync', '/favicon.ico', '/favicon-32.png', '/apple-touch-icon.png']
 
 export default function middleware(request) {
   if (PUBLIC_PATHS.includes(new URL(request.url).pathname)) return
