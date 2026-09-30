@@ -855,14 +855,14 @@ function commitA() {
   if (S.anchors.length < ANCHOR_MAX) { S.anchors.push({ name:nm, ini:getIni(nm), value:val }); alienCelebrate(nm); }
   S.addingSlot=false; S.anchorNameDraft=''; S.anchorValueDraft='';
   rAnchor();
-  syncToSheets('anchors');
+  saveToServer('anchors');
 }
 
 function removeAnchor(idx) {
   if (idx < 0 || idx >= S.anchors.length) return;
   S.anchors.splice(idx, 1);
   rAnchor();
-  syncToSheets('anchors');
+  saveToServer('anchors');
 }
 
 function commitAnchorVal(idx) {
@@ -871,7 +871,7 @@ function commitAnchorVal(idx) {
   S.editingAnchorId = null;
   S.editingAnchorVal = '';
   rAnchor();
-  syncToSheets('anchors');
+  saveToServer('anchors');
 }
 
 // ────────────────────────────────────────────────
@@ -1065,14 +1065,14 @@ function rWF(anim = true) {
 function commitStage(id, stage) {
   const sp = S.sprints.find(x => x.id === id); if (sp) sp.stage = stage;
   S.editingSprint = null; rWF(false);
-  syncToSheets('sprints');
+  saveToServer('sprints');
 }
 function commitNext() {
   const ed = S.editingSprint; if (!ed) return;
   const sp = S.sprints.find(x => x.id === ed.id);
   if (sp && S.sprintDraft.trim()) sp.ms = S.sprintDraft.trim();
   S.editingSprint = null; S.sprintDraft = ''; rWF(false);
-  syncToSheets('sprints');
+  saveToServer('sprints');
 }
 
 // ────────────────────────────────────────────────
@@ -1209,7 +1209,7 @@ function commitProsp() {
   S.prospects = S.prospects.filter(p => p && p.trim());
   S.editingIndex = null; S._addingProspect = false; rProsp();
   if (wasNew && draftVal) { confetti($('ps')); scoutAlien(draftVal); }
-  syncToSheets('prospects');
+  saveToServer('prospects');
 }
 
 // ────────────────────────────────────────────────
@@ -1447,18 +1447,17 @@ function scoutAlien(name) {
 }
 
 // ────────────────────────────────────────────────
-// SHEETS SYNC
+// DATA SYNC — Supabase via /api/data (edits are also copied to the Google Sheet)
 // ────────────────────────────────────────────────
 
-// ⚠ Replace this with your actual Vercel deployment URL after deploying
-const API = 'https://we-sg-dashboard.vercel.app/api/sheets';
+const API = '/api/data';
 
 let _lastSnapshot = null;
 let _syncPending  = false;
 
-// Write local state → Sheets (debounced 800ms to avoid hammering on rapid edits)
+// Write local state → database (debounced 800ms to avoid hammering on rapid edits)
 let _syncTimer = null;
-function syncToSheets(entity) {
+function saveToServer(entity) {
   _syncPending = true; // block polls immediately so they don't overwrite local edits
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(async () => {
@@ -1476,7 +1475,7 @@ function syncToSheets(entity) {
     } catch (e) {
       console.warn('[sync] write failed:', e.message);
     } finally {
-      // grace period: let Sheets propagate before we poll again
+      // grace period: let the save land before we poll again
       setTimeout(() => { _syncPending = false; }, 3000);
     }
   }, 800);
@@ -1487,8 +1486,8 @@ function snapEqual(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-// Poll Sheets → update local state → re-render only changed sections
-async function pollSheets() {
+// Poll the database → update local state → re-render only changed sections
+async function pollServer() {
   if (_syncPending) return;
   try {
     const res  = await fetch(API);
@@ -1499,11 +1498,9 @@ async function pollSheets() {
     if (snap === _lastSnapshot) return; // nothing changed
     _lastSnapshot = snap;
 
-    // Guard: a transient Sheets/token hiccup surfaces as empty arrays (the
-    // API returns 200 with `[]` rather than erroring), and a full-replace
-    // write clears the range for a moment before the new rows land. Never let
-    // an empty payload overwrite populated local state — that is what makes
-    // sections blank out mid-session. Treat "no rows this cycle" as no-op.
+    // Guard: never let an empty payload overwrite populated local state, so a
+    // hiccup can't blank out a section mid-session. Treat "no rows this
+    // cycle" as a no-op.
     const hasRows = v => Array.isArray(v) && v.length > 0;
 
     let changed = false;
@@ -1529,14 +1526,14 @@ async function pollSheets() {
       QUOTES = data.quotes; _qIdx = Math.floor(Math.random() * QUOTES.length); runQuote(300);
     }
 
-    if (changed) console.log('[sync] updated from Sheets at', new Date().toLocaleTimeString());
+    if (changed) console.log('[sync] updated at', new Date().toLocaleTimeString());
   } catch (e) {
     console.warn('[sync] poll failed:', e.message);
   }
 }
 
 // ────────────────────────────────────────────────
-// INIT — load from Sheets first, then render
+// INIT — render instantly, then load live data
 // ────────────────────────────────────────────────
 async function init() {
   // Close tray by default on mobile
@@ -1551,7 +1548,7 @@ async function init() {
   rProsp();
   _loaded = true;
 
-  // Then fetch live data from Sheets and update
+  // Then fetch live data and update
   try {
     const res  = await fetch(API);
     if (res.ok) {
@@ -1569,14 +1566,14 @@ async function init() {
       rAnchor();
       rWF();
       rProsp();
-      console.log('[sync] loaded from Sheets');
+      console.log('[sync] loaded live data');
     }
   } catch (e) {
     console.warn('[sync] initial load failed, using hardcoded data:', e.message);
   }
 
   // Poll every 5 seconds
-  setInterval(pollSheets, 5000);
+  setInterval(pollServer, 5000);
 }
 
 init();
