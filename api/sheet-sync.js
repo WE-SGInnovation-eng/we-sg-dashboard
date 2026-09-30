@@ -2,7 +2,7 @@
 // (apps-script/Code.gs) whenever someone edits a tab, and once to copy all
 // existing Sheet data into Supabase.
 //
-// POST { entity: 'anchors' | 'sprints' | 'prospects' | 'quotes', values: [[...], ...] }
+// POST { entity: 'anchors' | 'sprints' | 'prospects' | 'quotes', values: [[...], ...], allowEmpty?: true }
 // with header `X-Sync-Secret: <SHEET_SYNC_SECRET>`.
 //
 // This path skips the site password (middleware.js) because the script can't
@@ -36,15 +36,17 @@ export default async function handler(req) {
   }
 
   try {
-    const { entity, values } = await req.json();
+    const { entity, values, allowEmpty } = await req.json();
     if (!ENTITIES.includes(entity)) return json({ error: 'Unknown entity' }, 400);
 
     const rows = parseSheetRows(entity, values);
 
     // A tab with no rows is almost always a mid-edit accident (a cleared range,
     // a sort in progress), not a real request to delete everything. Refuse it,
-    // so one slip in the Sheet can't wipe the dashboard.
-    if (!rows.length) return json({ error: `No ${entity} rows found; nothing saved` }, 422);
+    // so one slip in the Sheet can't wipe the dashboard. The monthly snapshot
+    // empties Prospects on purpose and says so with `allowEmpty`.
+    const emptyAllowed = allowEmpty === true && entity === 'prospects';
+    if (!rows.length && !emptyAllowed) return json({ error: `No ${entity} rows found; nothing saved` }, 422);
 
     await replace(entity, rows);
     return json({ ok: true, entity, count: rows.length });
