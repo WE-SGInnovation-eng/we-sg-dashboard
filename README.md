@@ -65,18 +65,21 @@ built-in sample data and refuses saves, so the real Sheet can't be overwritten.
    and `SHEET_SYNC_SECRET` (see the table above). Keep the existing
    `GOOGLE_*` and `DASHBOARD_PASSWORD` values.
 3. **Deploy.** Merge this change to `main`. Vercel deploys it automatically.
-4. **Add the script to the Sheet.** In the Sheet, open
-   **Extensions → Apps Script**, paste `apps-script/Code.gs` from this repo
-   into the editor, and save. If the project already has code, add it as a
-   new script file (**＋ → Script**) instead, so nothing existing is lost. Then open
+4. **Update the Sheet's script.** Open the Apps Script project that holds
+   `saveMonthlySnapshot` and replace all of `Code.gs` with
+   `apps-script/Code.gs` from this repo. That file contains the existing setup
+   and snapshot code plus the new sync, so nothing is lost. Save, then open
    **Project Settings → Script Properties**, add `SYNC_SECRET` with the same
    value as `SHEET_SYNC_SECRET`, and save.
 5. **Copy the data across.** Reload the Sheet. From the new
    **Dashboard sync** menu, select **Send all tabs to the dashboard now** and
    allow the permissions Google asks for. Each tab should report how many rows
-   it sent.
+   it sent. (No menu? The script isn't attached to the Sheet. In the Apps
+   Script editor, choose `pushAllTabs` and select **Run** instead; the result
+   appears under **Execution log**.)
 6. **Turn on automatic sync.** From the same menu, select
-   **Turn on automatic sync**. Edits in the Sheet now reach the dashboard.
+   **Turn on automatic sync** (or run `installTrigger` from the editor). Edits
+   in the Sheet now reach the dashboard.
 
 After that, the old Sheets-only setup is gone; nothing else needs changing.
 
@@ -85,6 +88,11 @@ After that, the old Sheets-only setup is gone; nothing else needs changing.
 **The dashboard shows sample data, not your data**
 → Step 5 hasn't run, or it failed. Run **Send all tabs to the dashboard now** again and read the result.
 → In the browser console, look for `[sync] initial load failed`. A 500 from `/api/data` usually means `SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` is missing or wrong.
+
+**Monthly snapshot**
+`saveMonthlySnapshot` archives the month to History, clears the Prospects tab
+(names and industries), and tells the dashboard the list is now empty. Its
+summary pop-up says whether the dashboard was updated.
 
 **Sheet edits don't reach the dashboard**
 → Make sure **Turn on automatic sync** has been run. Google emails the person who turned it on when a sync fails.

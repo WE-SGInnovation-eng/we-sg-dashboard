@@ -1515,7 +1515,8 @@ async function pollServer() {
       rWF();
       changed = true;
     }
-    if (hasRows(data.prospects) && !snapEqual(data.prospects, S.prospects)) {
+    // Prospects can be genuinely empty (the monthly snapshot clears them).
+    if (Array.isArray(data.prospects) && !snapEqual(data.prospects, S.prospects)) {
       const _rawP = data.prospects;
       S.prospects = _rawP.map(p => typeof p === 'string' ? p : (p.name || ''));
       _computeWarm(_rawP);
@@ -1557,7 +1558,7 @@ async function init() {
       const okRows = v => Array.isArray(v) && v.length > 0;
       if (okRows(data.anchors)) S.anchors = data.anchors;
       if (okRows(data.sprints)) S.sprints = data.sprints;
-      if (okRows(data.prospects)) {
+      if (Array.isArray(data.prospects)) { // may be empty after the monthly snapshot
         const _rawPi = data.prospects;
         S.prospects = _rawPi.map(p => typeof p === 'string' ? p : (p.name || ''));
         _computeWarm(_rawPi);
